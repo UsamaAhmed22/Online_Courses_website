@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    environment {
+        REPO_URL = 'https://github.com/your-username/your-repo.git' // Replace with your repo URL
+        BUILD_DIR = 'C:\\Jenkins\\workspace\\build'                // Local build directory
+        DEPLOY_DIR = 'C:\\Jenkins\\workspace\\deploy'              // Deployment directory
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning repository...'
+                git branch: 'main', url: "${REPO_URL}"              // Replace 'main' with your branch name
+            }
+        }
+        stage('Build Static Website') {
+            steps {
+                echo 'Building static website...'
+                bat 'npm install'                                   // Install dependencies (if applicable)
+                bat 'npm run build'                                 // Run build command (adjust as needed)
+            }
+        }
+        stage('Deploy Static Website') {
+            steps {
+                echo 'Deploying static website...'
+                bat "mkdir ${DEPLOY_DIR} || echo Deploy directory exists"
+                bat "xcopy /s /e /y ${BUILD_DIR} ${DEPLOY_DIR}"     // Copy built files to deployment directory
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Build and deployment successful!'
+        }
+        failure {
+            echo 'Build or deployment failed!'
+        }
+    }
+}
